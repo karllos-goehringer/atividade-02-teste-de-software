@@ -28,7 +28,7 @@ class Compra {
     }
 
     calcularBonusPorCategoria() {
-        const classe = this._cliente.getClasse().toLowerCase();
+        const classe = this._cliente.classe().toLowerCase();
 
         switch (classe) {
             case 'ouro':
