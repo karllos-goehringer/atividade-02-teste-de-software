@@ -1,4 +1,5 @@
-export default clientes = [
+const Cliente = require('./cliente');
+clientes = [
   // --- Etiquetas BRONZE ---
   new Cliente("Ana Silva", "Bronze"),
   new Cliente("Carlos Andrade", "Bronze"),
@@ -15,3 +16,4 @@ export default clientes = [
   new Cliente("Camila Martins", "Ouro"),
   new Cliente("Eduardo Barbosa", "Ouro")
 ];
+module.exports = clientes;

@@ -1,13 +1,21 @@
-import Cliente from './Cliente.js';
-
-export default class Compra {
+const Cliente = require('./cliente');
+class Compra {
     _cliente;
     _valorBruto;
 
     constructor(cliente, valorBruto) {
-        this._cliente = cliente;
-        this._valorBruto = valorBruto;
+        if (cliente instanceof Cliente) {
+            this._cliente = cliente;
+        }else {
+            throw new Error('CLIENTE_INVALIDO');
+        }
+        if (valorBruto >= 0) {
+            this._valorBruto = valorBruto;
+        }else{
+            throw new Error('VALOR_NEGATIVO');
+        }
     }
+
     calcularDescontoPorValor() {
         if (this._valorBruto > 500) {
             return 0.15; // 15%
@@ -16,14 +24,15 @@ export default class Compra {
         } else if (this._valorBruto > 200) {
             return 0.05; // 5%
         }
-        return 0; 
+        return 0;
     }
+
     calcularBonusPorCategoria() {
         const classe = this._cliente.getClasse().toLowerCase();
-        
+
         switch (classe) {
             case 'ouro':
-                return 0.05; 
+                return 0.05;
             case 'prata':
                 return 0.03;
             case 'bronze':
@@ -31,11 +40,13 @@ export default class Compra {
                 return 0;
         }
     }
+
     getPorcentagemDescontoTotal() {
         const descValor = this.calcularDescontoPorValor();
         const descCategoria = this.calcularBonusPorCategoria();
         return descValor + descCategoria;
     }
+
     calcularValorFinal() {
         const descontoTotal = this.getPorcentagemDescontoTotal();
         return this._valorBruto * (1 - descontoTotal);
@@ -45,9 +56,10 @@ export default class Compra {
         const percDesconto = (this.getPorcentagemDescontoTotal() * 100).toFixed(0);
         const valorFinal = this.calcularValorFinal().toFixed(2);
         return `\n--- Resumo da Compra ---` +
-               `\nCliente: ${this._cliente.getNome()} (${this._cliente.getClasse()})` +
-               `\nValor Bruto: R$ ${this._valorBruto.toFixed(2)}` +
-               `\nDesconto Aplicado: ${percDesconto}%` +
-               `\nValor Final com Desconto: R$ ${valorFinal}`;
+            `\nCliente: ${this._cliente.getNome()} (${this._cliente.getClasse()})` +
+            `\nValor Bruto: R$ ${this._valorBruto.toFixed(2)}` +
+            `\nDesconto Aplicado: ${percDesconto}%` +
+            `\nValor Final com Desconto: R$ ${valorFinal}`;
     }
 }
+module.exports = Compra;
