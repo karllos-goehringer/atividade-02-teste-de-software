@@ -2,6 +2,7 @@ const cadastrarCompra = require('./atividade');
 const Cliente = require('./cliente');
 const clientes = require('./dados');
 const Compra = require('./compra');
+const EncurtadorUrl = require('./encurtadorUrl')
 //ERROS DE COMPRA
 describe('Erros de Compra', () => {
 test('sem passar parâmetro deve lançar erro', () => {
@@ -63,4 +64,64 @@ test('classe do cliente inexistente', () => {
 test('nome cliente nulo', () => {
     expect(() => new Cliente(null, 'CLASSE_INEXISTENTE')).toThrow('NOME_NULO');
 });
+});
+//Testes encurtador
+describe('EncurtadorUrl - Testes de Sucesso (Acertos)', () => {
+  beforeEach(() => {
+    // Limpa o banco em memória e reinicia o contador antes de cada teste
+    EncurtadorUrl.urls.clear();
+    EncurtadorUrl.contador = 1;
+  });
+
+  test('Deve encurtar uma URL válida com sucesso', () => {
+    const urlOriginal = 'https://meusite.com/artigo-longo';
+    const urlCurta = EncurtadorUrl.encurtar(urlOriginal);
+
+    expect(urlCurta).toBe('https://curto.link/1');
+    expect(EncurtadorUrl.urls.has('1')).toBe(true);
+  });
+
+  test('Deve expandir uma URL encurtada com sucesso', () => {
+    const urlOriginal = 'https://meusite.com/produto/123';
+    const urlCurta = EncurtadorUrl.encurtar(urlOriginal);
+    const resultado = EncurtadorUrl.expandir(urlCurta);
+
+    expect(resultado).toBe(urlOriginal);
+  });
+
+  test('Deve encurtar múltiplas URLs gerando códigos sequenciais em Base 62', () => {
+    const url1 = EncurtadorUrl.encurtar('https://site.com/1');
+    const url2 = EncurtadorUrl.encurtar('https://site.com/2');
+
+    expect(url1).toBe('https://curto.link/1');
+    expect(url2).toBe('https://curto.link/2');
+    expect(EncurtadorUrl.expandir(url1)).toBe('https://site.com/1');
+    expect(EncurtadorUrl.expandir(url2)).toBe('https://site.com/2');
+  });
+});
+
+describe('EncurtadorUrl - Testes de Falha (Forçando Erros)', () => {
+  beforeEach(() => {
+    EncurtadorUrl.urls.clear();
+    EncurtadorUrl.contador = 1;
+  });
+
+  test('Deve lançar erro ao tentar encurtar valores inválidos (null, undefined, números)', () => {
+    expect(() => EncurtadorUrl.encurtar(null)).toThrow("URL inválida fornecida.");
+    expect(() => EncurtadorUrl.encurtar(undefined)).toThrow("URL inválida fornecida.");
+    expect(() => EncurtadorUrl.encurtar(12345)).toThrow("URL inválida fornecida.");
+    expect(() => EncurtadorUrl.encurtar('')).toThrow("URL inválida fornecida.");
+  });
+
+  test('Deve lançar erro ao tentar expandir valores inválidos', () => {
+    expect(() => EncurtadorUrl.expandir(null)).toThrow("URL encurtada inválida fornecida.");
+    expect(() => EncurtadorUrl.expandir(undefined)).toThrow("URL encurtada inválida fornecida.");
+    expect(() => EncurtadorUrl.expandir('')).toThrow("URL encurtada inválida fornecida.");
+  });
+
+  test('Deve lançar erro ao tentar expandir uma URL que não existe no mapa', () => {
+    const urlInexistente = 'https://curto.link/codigoInexistente';
+
+    expect(() => EncurtadorUrl.expandir(urlInexistente)).toThrow("URL não encontrada.");
+  });
 });
